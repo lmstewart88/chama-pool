@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Chama — pooled investment, released on trust</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #16213e;
+    --bg-elevated: #1f2b4d;
+    --bg-elevated-2: #263460;
+    --border: rgba(243, 239, 227, 0.1);
+    --text: #f3efe3;
+    --text-muted: #9fb0c9;
+    --gold: #d9a441;
+    --gold-soft: rgba(217, 164, 65, 0.14);
+    --green: #4f9d69;
+    --green-soft: rgba(79, 157, 105, 0.16);
+    --red: #d97a6c;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 20px;
+    background-image:
+      radial-gradient(ellipse at top left, rgba(217, 164, 65, 0.08), transparent 55%),
+      radial-gradient(ellipse at bottom right, rgba(79, 157, 105, 0.08), transparent 55%);
+  }
+
+  main {
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .wordmark {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .wordmark h1 {
+    font-family: "Fraunces", serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: 32px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .network-badge {
+    font-size: 12px;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    padding: 5px 10px;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .network-badge .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+
+  .card + .card { margin-top: 16px; }
+
+  .project-name {
+    font-family: "Fraunces", serif;
+    font-size: 20px;
+    font-weight: 500;
+    margin: 0 0 4px;
+  }
+
+  .project-desc {
+    color: var(--text-muted);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 24px;
+    max-width: 40ch;
+  }
+
+  .progress-track {
+    height: 10px;
+    border-radius: 100px;
+    background: rgba(243, 239, 227, 0.08);
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--gold), var(--green));
+    transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .progress-fill { transition: none; }
+  }
+
+  .progress-numbers {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-top: 12px;
+    font-family: "IBM Plex Mono", monospace;
+  }
+
+  .progress-numbers .raised {
+    font-size: 22px;
+    font-weight: 500;
+  }
+
+  .progress-numbers .goal {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 100px;
+    margin-top: 16px;
+  }
+
+  .status-pill.open {
+    background: var(--gold-soft);
+    color: var(--gold);
+  }
+
+  .status-pill.complete {
+    background: var(--green-soft);
+    color: var(--green);
+  }
+
+  button {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 500;
+    font-size: 14px;
+    border-radius: 10px;
+    border: none;
+    padding: 13px 18px;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.15s ease;
+  }
+
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  button:active:not(:disabled) { transform: translateY(1px); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  button:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .btn-primary {
+    background: var(--gold);
+    color: #16213e;
+    width: 100%;
+  }
+
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    width: 100%;
+  }
+
+  .contribute-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  input[type="number"] {
+    flex: 1;
+    min-width: 0;
+    background: var(--bg-elevated-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 14px;
+    padding: 0 14px;
+  }
+
+  input[type="number"]:focus-visible {
+    outline: 2px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .contribute-row button {
+    width: auto;
+    white-space: nowrap;
+  }
+
+  .wallet-row {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+
+  .wallet-address {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 8px;
+    word-break: break-all;
+  }
+
+  .status-line {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 14px;
+    min-height: 18px;
+    line-height: 1.5;
+  }
+
+  .status-line.error { color: var(--red); }
+  .status-line a { color: var(--gold); }
+
+  .addresses {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 12px;
+  }
+
+  .addresses dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 12px;
+    margin: 0;
+  }
+
+  .addresses dt {
+    color: var(--text-muted);
+    font-family: "IBM Plex Sans", sans-serif;
+  }
+
+  .addresses dd {
+    margin: 0;
+    word-break: break-all;
+  }
+
+  .addresses dd a {
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .addresses dd a:hover { border-bottom-color: var(--gold); }
+</style>
+</head>
+<body>
+
+<main>
+  <div class="wordmark">
+    <h1>Chama</h1>
+    <span class="network-badge"><span class="dot"></span>Stellar testnet</span>
+  </div>
+
+  <div class="card">
+    <p class="project-name" id="projectName">Kitale harvest fund</p>
+    <p class="project-desc">Diaspora contributors pool funds toward this project. Once the goal is reached, the contract releases the full pool to the recipient automatically.</p>
+
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <div class="progress-numbers">
+      <span class="raised" id="raisedAmount">—</span>
+      <span class="goal" id="goalAmount">of — XLM goal</span>
+    </div>
+
+    <span class="status-pill open" id="statusPill">Connect a wallet to view live progress</span>
+
+    <div class="wallet-row">
+      <button class="btn-secondary" id="connectBtn">Connect Freighter</button>
+      <p class="wallet-address" id="walletAddress"></p>
+
+      <div class="contribute-row" id="contributeRow" style="display:none; margin-top:14px;">
+        <input type="number" id="amountInput" placeholder="Amount in XLM" min="0" step="1" />
+        <button class="btn-primary" id="contributeBtn" style="width:auto;">Contribute</button>
+      </div>
+    </div>
+
+    <p class="status-line" id="statusLine"></p>
+  </div>
+
+  <div class="card addresses">
+    <dl>
+      <dt>Contract</dt>
+      <dd><a id="contractLink" href="#" target="_blank" rel="noopener"></a></dd>
+      <dt>Recipient</dt>
+      <dd><a id="recipientLink" href="#" target="_blank" rel="noopener"></a></dd>
+    </dl>
+  </div>
+</main>
+
+<script type="module">
+import * as StellarSdk from "https://cdn.jsdelivr.net/npm/@stellar/stellar-sdk/+esm";
+import freighterApi from "https://cdn.jsdelivr.net/npm/@stellar/freighter-api/+esm";
+
+// ---- Configuration: your deployed pool ----
+const CONTRACT_ID = "CBJNEVBLXC7LYXHXUWONPS2BRSZUJED23AEYM2NB66GT35XPKVD5GZZC";
+const RECIPIENT_ID = "GDOQTV7O34ZRCUFQNSBZSKGGSCBM4KBD24DG4GNQOSMYLWQBAH64HFEN";
+const RPC_URL = "https://soroban-testnet.stellar.org";
+const NETWORK_PASSPHRASE = "Test SDF Network ; September 2015";
+const STROOPS_PER_XLM = 10_000_000;
+// --------------------------------------------
+
+const server = new StellarSdk.rpc.Server(RPC_URL);
+const contract = new StellarSdk.Contract(CONTRACT_ID);
+
+let walletAddress = null;
+let pollTimer = null;
+
+const els = {
+  connectBtn: document.getElementById("connectBtn"),
+  walletAddress: document.getElementById("walletAddress"),
+  contributeRow: document.getElementById("contributeRow"),
+  amountInput: document.getElementById("amountInput"),
+  contributeBtn: document.getElementById("contributeBtn"),
+  statusLine: document.getElementById("statusLine"),
+  statusPill: document.getElementById("statusPill"),
+  raisedAmount: document.getElementById("raisedAmount"),
+  goalAmount: document.getElementById("goalAmount"),
+  progressFill: document.getElementById("progressFill"),
+  contractLink: document.getElementById("contractLink"),
+  recipientLink: document.getElementById("recipientLink"),
+};
+
+els.contractLink.href = `https://stellar.expert/explorer/testnet/contract/${CONTRACT_ID}`;
+els.contractLink.textContent = short(CONTRACT_ID);
+els.recipientLink.href = `https://stellar.expert/explorer/testnet/account/${RECIPIENT_ID}`;
+els.recipientLink.textContent = short(RECIPIENT_ID);
+
+function short(addr) {
+  return `${addr.slice(0, 6)}…${addr.slice(-6)}`;
+}
+
+function setStatus(msg, isError = false) {
+  els.statusLine.textContent = msg;
+  els.statusLine.classList.toggle("error", isError);
+}
+
+async function buildReadTx(method, args = []) {
+  const account = await server.getAccount(walletAddress);
+  const tx = new StellarSdk.TransactionBuilder(account, {
+    fee: StellarSdk.BASE_FEE,
+    networkPassphrase: NETWORK_PASSPHRASE,
+  })
+    .addOperation(contract.call(method, ...args))
+    .setTimeout(30)
+    .build();
+  return tx;
+}
+
+async function readValue(method, args = []) {
+  const tx = await buildReadTx(method, args);
+  const sim = await server.simulateTransaction(tx);
+  if (StellarSdk.rpc.Api.isSimulationError(sim)) {
+    throw new Error(sim.error);
+  }
+  return StellarSdk.scValToNative(sim.result.retval);
+}
+
+async function refreshState() {
+  try {
+    const [raised, goal, complete] = await Promise.all([
+      readValue("get_balance"),
+      readValue("get_goal"),
+      readValue("is_complete"),
+    ]);
+
+    const raisedXlm = Number(raised) / STROOPS_PER_XLM;
+    const goalXlm = Number(goal) / STROOPS_PER_XLM;
+    const pct = goalXlm > 0 ? Math.min(100, (raisedXlm / goalXlm) * 100) : 0;
+
+    els.raisedAmount.textContent = `${raisedXlm.toLocaleString()} XLM`;
+    els.goalAmount.textContent = `of ${goalXlm.toLocaleString()} XLM goal`;
+    els.progressFill.style.width = `${pct}%`;
+
+    if (complete) {
+      els.statusPill.textContent = "Goal met — funds released to recipient";
+      els.statusPill.classList.remove("open");
+      els.statusPill.classList.add("complete");
+      els.contributeBtn.disabled = true;
+      els.amountInput.disabled = true;
+    } else {
+      els.statusPill.textContent = "Pool open";
+      els.statusPill.classList.add("open");
+      els.statusPill.classList.remove("complete");
+    }
+  } catch (err) {
+    console.error(err);
+    setStatus("Could not read pool state — check the contract is deployed and try again.", true);
+  }
+}
+
+function startPolling() {
+  refreshState();
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(refreshState, 6000);
+}
+
+els.connectBtn.addEventListener("click", async () => {
+  try {
+    const connected = await freighterApi.isConnected();
+    if (!connected.isConnected) {
+      setStatus("Freighter isn't installed or enabled in this browser.", true);
+      return;
+    }
+    const access = await freighterApi.requestAccess();
+    if (access.error) {
+      setStatus(access.error, true);
+      return;
+    }
+    walletAddress = access.address;
+    els.walletAddress.textContent = walletAddress;
+    els.connectBtn.textContent = "Connected";
+    els.connectBtn.disabled = true;
+    els.contributeRow.style.display = "flex";
+    setStatus("");
+    startPolling();
+  } catch (err) {
+    console.error(err);
+    setStatus("Couldn't connect to Freighter. Is the extension installed?", true);
+  }
+});
+
+els.contributeBtn.addEventListener("click", async () => {
+  const xlmAmount = parseFloat(els.amountInput.value);
+  if (!xlmAmount || xlmAmount <= 0) {
+    setStatus("Enter an amount greater than zero.", true);
+    return;
+  }
+  const stroops = BigInt(Math.round(xlmAmount * STROOPS_PER_XLM));
+
+  els.contributeBtn.disabled = true;
+  setStatus("Building transaction…");
+
+  try {
+    const account = await server.getAccount(walletAddress);
+    let tx = new StellarSdk.TransactionBuilder(account, {
+      fee: StellarSdk.BASE_FEE,
+      networkPassphrase: NETWORK_PASSPHRASE,
+    })
+      .addOperation(
+        contract.call(
+          "contribute",
+          StellarSdk.Address.fromString(walletAddress).toScVal(),
+          StellarSdk.nativeToScVal(stroops, { type: "i128" })
+        )
+      )
+      .setTimeout(60)
+      .build();
+
+    const prepared = await server.prepareTransaction(tx);
+
+    setStatus("Confirm the transaction in Freighter…");
+    const signed = await freighterApi.signTransaction(prepared.toXDR(), {
+      networkPassphrase: NETWORK_PASSPHRASE,
+    });
+
+    const signedTx = StellarSdk.TransactionBuilder.fromXDR(signed.signedTxXdr, NETWORK_PASSPHRASE);
+    setStatus("Sending to the network…");
+    const sendResult = await server.sendTransaction(signedTx);
+
+    if (sendResult.status === "ERROR") {
+      throw new Error("Transaction rejected by the network.");
+    }
+
+    let status = sendResult.status;
+    let hash = sendResult.hash;
+    for (let i = 0; i < 15 && status !== "SUCCESS" && status !== "FAILED"; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
+      const getResult = await server.getTransaction(hash);
+      status = getResult.status;
+    }
+
+    if (status === "SUCCESS") {
+      setStatus(`Contribution confirmed. View on Stellar Expert.`);
+      els.statusLine.innerHTML = `Contribution confirmed. <a href="https://stellar.expert/explorer/testnet/tx/${hash}" target="_blank" rel="noopener">View transaction →</a>`;
+      els.amountInput.value = "";
+      await refreshState();
+    } else {
+      setStatus("Transaction did not confirm in time. Check Stellar Expert directly.", true);
+    }
+  } catch (err) {
+    console.error(err);
+    setStatus(err.message || "Contribution failed.", true);
+  } finally {
+    els.contributeBtn.disabled = false;
+  }
+});
+</script>
+
+</body>
+</html>
