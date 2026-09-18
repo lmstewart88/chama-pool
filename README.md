@@ -29,12 +29,24 @@ To try it: open `index.html` in a browser with the [Freighter wallet extension](
 
 Fast settlement, near-zero fees, and Soroban smart contracts mean the rules of a chama — contribute, track, release — can be enforced by code instead of by trust in one person holding the money. Recipients don't need a Stellar wallet to eventually receive local currency: Stellar's anchor network (built on open SEP standards) connects on-chain funds to local payment rails like M-Pesa in Kenya, so cash-out to the ground is a standard integration, not a hypothetical.
 
+## Trust & Verification
+
+A smart contract solves one layer of trust: once money is in the pool, no single person can quietly walk off with it or redirect it. It says nothing about whether the underlying project is real — that's a separate problem, and Chama treats it as a governance layer that sits on top of the contract, not something the blockchain hand-waves away.
+
+**1. Sourcing** — projects come through a vetted channel rather than open public submission: a field network of people who have personally scouted and assessed the project on the ground, not anonymous proposals from strangers on the internet.
+
+**2. Verification before a pool goes live** — before a project's pool is initialized, it requires identity verification of the recipient address (tied to a real, named person or organisation), documentation of the project (cost breakdown, photos, a local partner's written attestation), and a named local point of contact who is not the recipient — someone who can independently confirm the project is real.
+
+**3. Governance during the pool's life** — the current version releases the full pool in one transfer once the goal is met. For real-world deployment, this becomes milestone-based release instead: funds unlock in tranches as the project shows proof of progress, with a pause or refund path if a project stalls. (See Roadmap.)
+
+The blockchain removes the "did someone skim the pot" risk. It doesn't remove the "is this a real project" risk — that's the part Chama's verification layer is for.
+
 ## Roadmap
 
 - Connect a Stellar anchor for M-Pesa cash-out to recipients
 - Support multiple simultaneous project pools
-- Refund path for pools that don't meet their goal by a deadline
-- Recipient identity verification for real-world deployment
+- Milestone-based release with proof-of-progress checkpoints, and a refund/pause path if a project stalls
+- Recipient and local-partner identity verification built into project onboarding, not just the contract
 
 ## Local development
 
